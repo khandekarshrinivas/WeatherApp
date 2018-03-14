@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/background"
+    tools:context="com.shrinivas.weatherapp.ShowWeatherActivity">
+
+    <fragment
+        android:id="@+id/place_autocomplete_fragment"
+        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_alignParentStart="true" />
+
+    <ImageView
+        android:id="@+id/cityImage"
+        android:layout_width="match_parent"
+        android:layout_height="169dp"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/place_autocomplete_fragment" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="230dp"
+        android:layout_below="@+id/cityImage"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="112dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imgClimate"
+                android:layout_width="110dp"
+                android:layout_height="110dp"
+                android:contentDescription="@string/climateImgDesc" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+
+                <TextView
+                    android:id="@+id/cityName"
+                    android:layout_width="match_parent"
+                    android:layout_height="58dp"
+                    android:gravity="bottom"
+                    android:textColor="@android:color/black"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/weather"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:textSize="18sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="115dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/temp"
+                android:layout_width="110dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textAlignment="center"
+                android:textSize="24sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="115dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="33dp"
+                    android:includeFontPadding="false"
+                    android:textSize="18sp" />
+
+
+                <TextView
+                    android:id="@+id/minMaxTemp"
+                    android:layout_width="match_parent"
+                    android:layout_height="43dp"
+                    android:includeFontPadding="false"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/humidityCloudCoverage"
+                    android:layout_width="match_parent"
+                    android:layout_height="81dp"
+                    android:includeFontPadding="false"
+                    android:textSize="18sp"
+                    android:gravity="top"/>
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_below="@+id/linearLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="99dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="match_parent"
+            android:layout_height="45dp" />
+
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="match_parent"
+            android:layout_height="50dp" />
+    </LinearLayout>
+</RelativeLayout>
+
+
