@@ -34,13 +34,11 @@ public class SplashActivity extends AppCompatActivity {
                 .load(R.mipmap.welcome_image)
                 .into(welImageView);
 
-
         /* New Handler to start the Menu-Activity
          * and close this Splash-Screen after some seconds.*/
         new Handler().postDelayed(new Runnable(){
             @Override
             public void run() {
-
                 /* Create an Intent that will start the Menu-Activity. */
                 Intent intent = new Intent(getBaseContext(), ShowWeatherActivity.class);
                 startActivity(intent);

@@ -3,6 +3,7 @@
     package="com.shrinivas.weatherapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -11,18 +12,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SplashActivity">
+        <activity
+            android:name=".SplashActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ShowWeatherActivity"/>
 
+        <activity
+            android:name=".ShowWeatherActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <!--        <meta-data
+                    android:name="com.google.android.geo.API_KEY"
+                    android:value="AIzaSyAtgvCDUb7JcVuCGWmSfsdtbDc5mNcdM1Y"/>-->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAtgvCDUb7JcVuCGWmSfsdtbDc5mNcdM1Y"/>
+            android:value="AIzaSyA__c2o3FQxm-oW6DEroSh_VpDo5TOlrdY" />
     </application>
 
 </manifest>
