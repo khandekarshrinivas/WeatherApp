@@ -5,7 +5,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,16 +40,17 @@ import java.net.URL;
 import java.util.HashMap;
 
 public class ShowWeatherActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
 
     ImageView weatherIcon;
     TextView cityNameTxtView, temperatureTxtView, weatherTxtView, descriptionTxtView, humidityCloudCoverageTxtView, minMaxTempTxtView;
     Runnable runnable;
     PlaceAutocompleteFragment autocompleteFragment;
-    private static final String TAG = "MainActivity";
     GeoDataClient mGeoDataClient;
     RelativeLayout relativeLayout;
     LinearLayout linearLayout1, linearLayout2;
     BitmapDrawable bitmapDrawable;
+    ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +67,7 @@ public class ShowWeatherActivity extends AppCompatActivity {
         linearLayout1 = findViewById(R.id.linearLayout1);
         linearLayout2 = findViewById(R.id.linearLayout2);
         relativeLayout = findViewById(R.id.relativeLayout1);
+        imageView = findViewById(R.id.backgroundImage);
 
         //Place autocomplete fragment which returns place predictions to the user
         autocompleteFragment = (PlaceAutocompleteFragment)
@@ -83,8 +84,7 @@ public class ShowWeatherActivity extends AppCompatActivity {
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                getWeatherDetailsFromCityName(place.getName().toString());
-                getPhotoFromCityName(place.getId());
+                getWeatherDetailsFromCityName(place);
                 Log.i(TAG, "Place: " + place.getName());
             }
 
@@ -107,37 +107,40 @@ public class ShowWeatherActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<PlacePhotoMetadataResponse> task) {
                 // Get the list of photos.
                 PlacePhotoMetadataResponse photos = task.getResult();
-                // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
-                PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
-                // Get the first photo in the list.
-                PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
-                // Get the attribution text.
-                CharSequence attribution = photoMetadata.getAttributions();
-                // Get a full-size bitmap for the photo.
-                Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
-                photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
-                    @Override
-                    public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
-                        PlacePhotoResponse photo = task.getResult();
-                        Bitmap bitmap = photo.getBitmap();
-                        bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
-                        relativeLayout.setBackground(bitmapDrawable);
+
+                if(photos != null && photos.getPhotoMetadata() != null) {
+                    // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
+                    PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
+                    if (photoMetadataBuffer != null && photoMetadataBuffer.get(0) != null ){
+                        // Get the first photo in the list.
+                        PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
+                        // Get the attribution text.
+                        CharSequence attribution = photoMetadata.getAttributions();
+                        // Get a full-size bitmap for the photo.
+                        Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
+                        photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
+                            @Override
+                            public void onComplete(@NonNull Task<PlacePhotoResponse> task) {
+                                PlacePhotoResponse photo = task.getResult();
+                                Bitmap bitmap = photo.getBitmap();
+                                imageView.setImageBitmap(bitmap);
+                            }
+                        });
                     }
-                });
+                }
             }
         });
     }
 
     /**
      * Method which runs the thread to execute OpenWeather api
-     * @param cityName {@link String}
+     * @param place {@link Place}
      */
-    public void getWeatherDetailsFromCityName(final String cityName) {
+    public void getWeatherDetailsFromCityName(final Place place) {
         runnable = new Runnable() {
             @Override
             public void run() {
-                getWeatherResponse(cityName);
-
+                getWeatherResponse(place);
             }
         };
         Thread thread = new Thread(null, runnable, "background");
@@ -153,7 +156,6 @@ public class ShowWeatherActivity extends AppCompatActivity {
             @Override
             public void run() {
                 getPhotos(placeId);
-
             }
         };
         Thread thread = new Thread(null, runnable, "background");
@@ -162,12 +164,12 @@ public class ShowWeatherActivity extends AppCompatActivity {
 
     /**
      * Method to execute OpenWeather api to get the weather details of the city, which is passed as a parameter
-     * @param cityName {@link String}
+     * @param place {@link Place}
      */
-    public void getWeatherResponse(final String cityName) {
+    public void getWeatherResponse(final Place place) {
 
         HashMap<String, String> queryParameters = new HashMap<>();
-        queryParameters.put(WeatherConstants.KEY_CITY_NAME, cityName);
+        queryParameters.put(WeatherConstants.KEY_CITY_NAME, place.getName().toString());
         queryParameters.put(WeatherConstants.APPID_Key, WeatherConstants.APPID_Value);
         queryParameters.put(WeatherConstants.UNITS_Key, WeatherConstants.UNITS_Value);
         String url = buildUrl(queryParameters);
@@ -181,6 +183,7 @@ public class ShowWeatherActivity extends AppCompatActivity {
                 try {
                     linearLayout1.setBackgroundColor(getColor(R.color.colorWhite));
                     linearLayout2.setBackgroundColor(getColor(R.color.colorWhite));
+                    relativeLayout.setBackground(bitmapDrawable);
 
                     JSONObject weatherResponseOnject = (JSONObject) response.get("main");
                     JSONObject res = (JSONObject) response.getJSONArray("weather").get(0);
@@ -189,13 +192,11 @@ public class ShowWeatherActivity extends AppCompatActivity {
                     String temp = weatherResponseOnject.get("temp").toString() + degree;
                     String min = "Min. " + weatherResponseOnject.get("temp_min").toString() + degree;
                     String max = "Max. " + weatherResponseOnject.get("temp_max").toString() + degree;
-
                     String cloudCoverage = "Clouds\t: " + response.getJSONObject("clouds").get("all").toString() + "%";
                     String humidity = "Humidity\t: " + weatherResponseOnject.get("humidity").toString() + "%";
 
                     cityNameTxtView.setText(displayCityName);
                     temperatureTxtView.setText(temp);
-
                     minMaxTempTxtView.setText(String.format("%s \t\t %s", min, max));
                     weatherTxtView.setText(res.get("main").toString());
                     descriptionTxtView.setText(StringUtils.capitalize(res.get("description").toString()));
@@ -203,18 +204,24 @@ public class ShowWeatherActivity extends AppCompatActivity {
 
                     URL url = new URL(WeatherConstants.WEATHER_ICON_URL + res.get("icon") + ".png");
                     Glide.with(getApplicationContext()).load(url).into(weatherIcon);
-
-
+                    if(place.getId() != null) {
+                        try {
+                            getPhotoFromCityName(place.getId());
+                        }
+                        catch (Exception e){
+                            Log.e(TAG, "Error: " + e.getCause());
+                        }
+                    }
                 } catch (JSONException | IOException e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Error: " + e.getCause());
+                }catch(Error e) {
+                    Log.e(TAG, "Error: " + e.getCause());
                 }
-
             }
 
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                relativeLayout.setBackgroundColor(getResources().getColor(R.color.colorBackground));
                 error.printStackTrace();
                 Toast.makeText(getApplicationContext(), WeatherConstants.ERROR_MSG, Toast.LENGTH_SHORT).show();
             }
