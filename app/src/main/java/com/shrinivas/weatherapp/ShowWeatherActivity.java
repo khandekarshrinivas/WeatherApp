@@ -34,7 +34,6 @@ import com.google.android.gms.tasks.Task;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
-import java.net.URI;
 import java.util.HashMap;
 
 public class ShowWeatherActivity extends AppCompatActivity {
@@ -209,8 +208,8 @@ public class ShowWeatherActivity extends AppCompatActivity {
                     humidityCloudCoverageTxtView.setText(String.format("%s\n%s", humidity, cloudCoverage));
 
                     //Fetching weather icon from OpenMap api
-                    URI uri = new URI(WeatherConstants.WEATHER_ICON_URL + res.get("icon") + ".png");
-                    Glide.with(getApplicationContext()).load(uri).into(weatherIcon);
+                    String url = String.format("%s%s%s", WeatherConstants.WEATHER_ICON_URL, res.get("icon"), ".png");
+                    Glide.with(getApplicationContext()).load(url).into(weatherIcon);
 
                     //get the image of the city if the placeId is not null
                     if (place.getId() != null) {
