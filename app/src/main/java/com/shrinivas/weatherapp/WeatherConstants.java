@@ -3,6 +3,7 @@ package com.shrinivas.weatherapp;
 /**
  * @author Shrinivas Khandekar
  * Created by Shrinivas Khandekar on 2018-03-07.
+ * Class to store all constant fields
  */
 
 public class WeatherConstants {

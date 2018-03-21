@@ -1,20 +1,18 @@
 package com.shrinivas.weatherapp;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
-
+//Class to display Splash screen
 public class SplashActivity extends AppCompatActivity {
 
-    //https://stackoverflow.com/questions/5486789/how-do-i-make-a-splash-screen
+    //reference - https://stackoverflow.com/questions/5486789/how-do-i-make-a-splash-screen
 
     /** Duration of wait **/
     private final int SPLASH_DISPLAY_LENGTH = 7500;

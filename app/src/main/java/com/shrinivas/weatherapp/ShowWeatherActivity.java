@@ -32,16 +32,16 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.util.HashMap;
 
 public class ShowWeatherActivity extends AppCompatActivity {
+
     private static final String TAG = "MainActivity";
 
+    //variables
     ImageView weatherIcon;
     TextView cityNameTxtView, temperatureTxtView, weatherTxtView, descriptionTxtView, humidityCloudCoverageTxtView, minMaxTempTxtView;
     Runnable runnable;
@@ -57,6 +57,7 @@ public class ShowWeatherActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_weather);
 
+        //Loads all the widgets in the activity using their ids
         weatherIcon = findViewById(R.id.imgClimate);
         cityNameTxtView = findViewById(R.id.cityName);
         temperatureTxtView = findViewById(R.id.temp);
@@ -97,6 +98,7 @@ public class ShowWeatherActivity extends AppCompatActivity {
 
     /**
      * Method to get the photos for the placeId
+     *
      * @param placeId {@link String}
      */
     private void getPhotos(String placeId) {
@@ -108,14 +110,13 @@ public class ShowWeatherActivity extends AppCompatActivity {
                 // Get the list of photos.
                 PlacePhotoMetadataResponse photos = task.getResult();
 
-                if(photos != null && photos.getPhotoMetadata() != null) {
+                if (photos != null && photos.getPhotoMetadata() != null) {
                     // Get the PlacePhotoMetadataBuffer (metadata for all of the photos).
                     PlacePhotoMetadataBuffer photoMetadataBuffer = photos.getPhotoMetadata();
-                    if (photoMetadataBuffer != null && photoMetadataBuffer.get(0) != null ){
+                    if (photoMetadataBuffer != null && photoMetadataBuffer.get(0) != null) {
                         // Get the first photo in the list.
                         PlacePhotoMetadata photoMetadata = photoMetadataBuffer.get(0);
-                        // Get the attribution text.
-                        CharSequence attribution = photoMetadata.getAttributions();
+
                         // Get a full-size bitmap for the photo.
                         Task<PlacePhotoResponse> photoResponse = mGeoDataClient.getPhoto(photoMetadata);
                         photoResponse.addOnCompleteListener(new OnCompleteListener<PlacePhotoResponse>() {
@@ -134,6 +135,7 @@ public class ShowWeatherActivity extends AppCompatActivity {
 
     /**
      * Method which runs the thread to execute OpenWeather api
+     *
      * @param place {@link Place}
      */
     public void getWeatherDetailsFromCityName(final Place place) {
@@ -149,6 +151,7 @@ public class ShowWeatherActivity extends AppCompatActivity {
 
     /**
      * Method which runs the thread to fetch the images for the place
+     *
      * @param placeId {@link String}
      */
     public void getPhotoFromCityName(final String placeId) {
@@ -164,6 +167,7 @@ public class ShowWeatherActivity extends AppCompatActivity {
 
     /**
      * Method to execute OpenWeather api to get the weather details of the city, which is passed as a parameter
+     *
      * @param place {@link Place}
      */
     public void getWeatherResponse(final Place place) {
@@ -175,16 +179,17 @@ public class ShowWeatherActivity extends AppCompatActivity {
         String url = buildUrl(queryParameters);
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
             @Override
             public void onResponse(JSONObject response) {
                 Toast.makeText(getApplicationContext(), WeatherConstants.SUCCESS_MSG, Toast.LENGTH_SHORT).show();
 
                 try {
+                    //If request is successful, then makes the layouts visible
                     linearLayout1.setBackgroundColor(getColor(R.color.colorWhite));
                     linearLayout2.setBackgroundColor(getColor(R.color.colorWhite));
                     relativeLayout.setBackground(bitmapDrawable);
 
+                    // Parsing json object and getting all neceessary fields
                     JSONObject weatherResponseOnject = (JSONObject) response.get("main");
                     JSONObject res = (JSONObject) response.getJSONArray("weather").get(0);
                     String degree = (char) 0x00B0 + "C";
@@ -195,6 +200,7 @@ public class ShowWeatherActivity extends AppCompatActivity {
                     String cloudCoverage = "Clouds\t: " + response.getJSONObject("clouds").get("all").toString() + "%";
                     String humidity = "Humidity\t: " + weatherResponseOnject.get("humidity").toString() + "%";
 
+                    //Setting the values for the textfields in the layout
                     cityNameTxtView.setText(displayCityName);
                     temperatureTxtView.setText(temp);
                     minMaxTempTxtView.setText(String.format("%s \t\t %s", min, max));
@@ -202,23 +208,18 @@ public class ShowWeatherActivity extends AppCompatActivity {
                     descriptionTxtView.setText(StringUtils.capitalize(res.get("description").toString()));
                     humidityCloudCoverageTxtView.setText(String.format("%s\n%s", humidity, cloudCoverage));
 
-                    URL url = new URL(WeatherConstants.WEATHER_ICON_URL + res.get("icon") + ".png");
-                    Glide.with(getApplicationContext()).load(url).into(weatherIcon);
-                    if(place.getId() != null) {
-                        try {
-                            getPhotoFromCityName(place.getId());
-                        }
-                        catch (Exception e){
-                            Log.e(TAG, "Error: " + e.getCause());
-                        }
+                    //Fetching weather icon from OpenMap api
+                    URI uri = new URI(WeatherConstants.WEATHER_ICON_URL + res.get("icon") + ".png");
+                    Glide.with(getApplicationContext()).load(uri).into(weatherIcon);
+
+                    //get the image of the city if the placeId is not null
+                    if (place.getId() != null) {
+                        getPhotoFromCityName(place.getId());
                     }
-                } catch (JSONException | IOException e) {
-                    Log.e(TAG, "Error: " + e.getCause());
-                }catch(Error e) {
+                } catch (Exception e) {
                     Log.e(TAG, "Error: " + e.getCause());
                 }
             }
-
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
@@ -232,19 +233,22 @@ public class ShowWeatherActivity extends AppCompatActivity {
 
     /**
      * Method to build url when query paramters are passed in HaspMap in a Key-Value pair
+     *
      * @param queryParameters {@link HashMap}
      * @return url {@link String}
      */
-    public String buildUrl(HashMap queryParameters){
-        String urlParameters = "";
-
-        for ( Object key :queryParameters.keySet() ){
-            String val = key.toString() + "=" + queryParameters.get(key);
-            if (!urlParameters.isEmpty()){
-                urlParameters = urlParameters + "&";
+    public String buildUrl(HashMap queryParameters) {
+        StringBuilder urlParameters = new StringBuilder();
+        StringBuilder val;
+        //Builds the url by th e query parameters in the hashmap
+        for (Object key : queryParameters.keySet()) {
+            val = new StringBuilder();
+            val.append(key.toString()).append("=").append(queryParameters.get(key));
+            if (!urlParameters.toString().isEmpty()) {
+                urlParameters.append("&");
             }
-            urlParameters = urlParameters + val;
+            urlParameters.append(val);
         }
-        return (WeatherConstants.WEATHER_URL + "?" +urlParameters );
+        return (WeatherConstants.WEATHER_URL + "?" + urlParameters);
     }
 }
